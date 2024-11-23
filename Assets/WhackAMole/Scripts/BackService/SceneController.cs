@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace WhackAMole
 {
-    public class SceneController : MonoBehaviour
+    public class SceneController : MonoBehaviour, IInitialize
     {
         public static SceneController Instance { get; private set; }
         public enum SceneType
@@ -19,14 +19,13 @@ namespace WhackAMole
         private Coroutine _coroutineLoad;
         [SerializeField] private int _indexSceneLoaded = int.MinValue;
 
-        private void Awake()
+        public void Initialize()
         {
             Instance = this;
         }
 
         public void LoadScene(SceneType scene, Action onComplete)
         {
-            Debug.Log("Load Scene");
             if (_coroutineLoad != null)
             {
                 Debug.Log($"{GetType()}: Trying is trying to load next scene!");

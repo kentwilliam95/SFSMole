@@ -6,17 +6,12 @@ using DG.Tweening;
 
 namespace WhackAMole
 {
-    public class PanelFade : MonoBehaviour
+    public class PanelFade : MonoBehaviour, IInitialize
     {
         public static PanelFade Instance;
 
         [SerializeField] private CanvasGroup _canvasGroup;
         private Tween _tweenfade;
-
-        private void Awake()
-        {
-            Instance = this;
-        }
 
         public void Show(bool force = false, Action onComplete = null)
         {
@@ -68,6 +63,11 @@ namespace WhackAMole
             {
                 onComplete?.Invoke();
             });
+        }
+
+        public void Initialize()
+        {
+            Instance = this;
         }
     }
 }
