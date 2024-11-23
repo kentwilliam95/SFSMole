@@ -10,19 +10,14 @@ namespace WhackAMole
     public class SceneController : MonoBehaviour
     {
         public static SceneController Instance { get; private set; }
-
-        private Coroutine _coroutineLoad;
-        private AsyncOperation _loadOp;
-        private AsyncOperation _UnloadOp;
-        private Action _onComplete;
-        [SerializeField] private int _indexSceneLoaded = int.MinValue;
-        private int _indexNextScene;
-
         public enum SceneType
         {
             MainMenu = 1,
             Game = 2,
         }
+
+        private Coroutine _coroutineLoad;
+        [SerializeField] private int _indexSceneLoaded = int.MinValue;
 
         private void Awake()
         {
@@ -31,6 +26,7 @@ namespace WhackAMole
 
         public void LoadScene(SceneType scene, Action onComplete)
         {
+            Debug.Log("Load Scene");
             if (_coroutineLoad != null)
             {
                 Debug.Log($"{GetType()}: Trying is trying to load next scene!");
@@ -38,7 +34,6 @@ namespace WhackAMole
             }
 
             int sceneIndex = (int)scene;
-
             UnloadScene(_indexSceneLoaded, () =>
             {
                 LoadNextScene(sceneIndex, onComplete);
@@ -64,10 +59,11 @@ namespace WhackAMole
         private IEnumerator LoadNextScene_C(int sceneIndex, Action onComplete)
         {
             var loadOP = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Additive);
-            while (loadOP.progress < 1)
+            loadOP.allowSceneActivation = true;
+            while (loadOP.progress < 1 || !loadOP.isDone)
             {
                 yield return null;
-            }
+            }            
             _coroutineLoad = null;
             _indexSceneLoaded = sceneIndex;
             onComplete?.Invoke();
@@ -76,7 +72,7 @@ namespace WhackAMole
         private IEnumerator UnloadScene_C(int sceneIndex, Action onComplete)
         {
             var loadOP = SceneManager.UnloadSceneAsync(sceneIndex);
-            while (loadOP.progress < 1)
+            while (loadOP.progress < 1 || !loadOP.isDone)
             {
                 yield return null;
             }
@@ -84,37 +80,5 @@ namespace WhackAMole
             _indexSceneLoaded = int.MinValue;
             onComplete?.Invoke();
         }
-
-
-        //private void Update()
-        //{
-        //    LoadOperationUpdate();
-        //    UnloadOperationUpdate();
-        //}
-
-        ////change it to coroutine
-        //private void LoadOperationUpdate()
-        //{
-        //    if (_loadOp == null) { return; }
-        //    if (_loadOp.progress >= 1)
-        //    {
-        //        _indexSceneLoaded = _indexNextScene;
-
-        //        _onComplete?.Invoke();
-        //        _onComplete = null;
-        //        _loadOp = null;
-        //    }
-        //}
-
-        //private void UnloadOperationUpdate()
-        //{
-        //    if (_UnloadOp == null) { return; }
-        //    if (_UnloadOp.progress >= 1)
-        //    {
-        //        _onComplete?.Invoke();
-        //        _onComplete = null;
-        //        _UnloadOp = null;
-        //    }
-        //}
     }
 }

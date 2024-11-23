@@ -1,22 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace WhackAMole
 {
     public class MainController : MonoBehaviour
     {
-        private void Update()
+        private void Start()
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                SceneController.Instance.LoadScene(SceneController.SceneType.MainMenu, null);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                SceneController.Instance.LoadScene(SceneController.SceneType.Game, null);
-            }
+            PanelFade.Instance.Show(true);
+            SceneController.Instance.LoadScene(SceneController.SceneType.MainMenu, null);
         }
     }
 }
