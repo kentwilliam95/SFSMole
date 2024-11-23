@@ -1,10 +1,9 @@
-using Codice.Client.BaseCommands;
-using PlasticGui.Configuration.CloudEdition.Welcome;
 using Sfs2X;
 using Sfs2X.Core;
 using Sfs2X.Logging;
 using Sfs2X.Requests;
 using Sfs2X.Util;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +12,10 @@ namespace WhackAMole
 {
     public class SFSController : MonoBehaviour, IInitialize
     {
+        public const string USERNAMEKEY = "Username";
+        public static SFSController Instance { get; private set; }
+        
+        private Action _onLoginSuccess;
         private SmartFox _sfs;
 
         [Header("Config")]
@@ -45,9 +48,12 @@ namespace WhackAMole
         [Tooltip("Client-side SmartFoxServer logging level")]
         public LogLevel logLevel = LogLevel.INFO;
 
+        public Action OnConnected;
+        public Action OnDisconnected;
 
         public void Initialize()
         {
+            Instance = this;
             Application.runInBackground = true;
 #if !UNITY_WEBGL
             _sfs = new SmartFox();
@@ -94,10 +100,12 @@ namespace WhackAMole
                 _sfs.ProcessEvents();
         }
 
-        private void Login()
+        public void Login(string username, string password, Action onLoginSuccess)
         {
             Debug.Log("Performing login...");
-            _sfs.Send(new LoginRequest("MBP"));
+            _sfs.Send(new LoginRequest(username));
+            _onLoginSuccess = onLoginSuccess;
+            PlayerPrefs.SetString(USERNAMEKEY, username);
         }
 
         private void OnApplicationQuit()
@@ -115,21 +123,13 @@ namespace WhackAMole
                 Debug.Log("Connection established successfully");
                 Debug.Log("SFS2X API version: " + _sfs.Version);
                 Debug.Log("Connection mode is: " + _sfs.ConnectionMode);
-
-#if !UNITY_WEBGL
+                
+                OnConnected?.Invoke();
                 if (encrypt)
                 {
                     Debug.Log("Initializing encryption...");
                     _sfs.InitCrypto();
                 }
-                else
-                {
-                    Login();
-                }
-#else
-        // Attempt login
-        Login();
-#endif
             }
             else
             {
@@ -145,9 +145,9 @@ namespace WhackAMole
             _sfs.RemoveEventListener(SFSEvent.LOGIN, SFS_OnLogin);
             _sfs.RemoveEventListener(SFSEvent.LOGIN_ERROR, SFS_OnLoginError);
 
-            _sfs = null;            
+            _sfs = null;
 
-           
+
             string reason = (string)evt.Params["reason"];
             Debug.Log("Connection to SmartFoxServer lost; reason is: " + reason);
 
@@ -167,6 +167,8 @@ namespace WhackAMole
 
                 Debug.Log(connLostMsg);
             }
+
+            OnDisconnected?.Invoke();
         }
 
         private void SFS_OnCryptoInitialized(BaseEvent evt)
@@ -174,16 +176,10 @@ namespace WhackAMole
             if ((bool)evt.Params["success"])
             {
                 Debug.Log("Encryption initialized successfully");
-
-                // Attempt login
-                Login();
             }
             else
             {
                 Debug.Log("Encryption initialization failed: " + (string)evt.Params["errorMessage"]);
-
-                // Disconnect
-                // NOTE: this causes a CONNECTION_LOST event with reason "manual", which in turn removes all SFS listeners
                 _sfs.Disconnect();
             }
         }
@@ -191,11 +187,19 @@ namespace WhackAMole
         private void SFS_OnLogin(BaseEvent evt)
         {
             Debug.Log($"[SFS] Login Success");
+            var users = _sfs.UserManager.GetUserList();
+            foreach (var item in users)
+            {
+                Debug.Log($"Name: {item.Name}, {item.PrivilegeId}");
+            }
+
+            _onLoginSuccess?.Invoke();
+            _onLoginSuccess = null;
         }
 
         private void SFS_OnLoginError(BaseEvent evt)
         {
-            Debug.Log($"[SFS] Login Error: {(string)evt.Params["errorMessage"]}");            
+            Debug.Log($"[SFS] Login Error: {(string)evt.Params["errorMessage"]}");
 
             // Disconnect
             // NOTE: this causes a CONNECTION_LOST event with reason "manual", which in turn removes all SFS listeners
