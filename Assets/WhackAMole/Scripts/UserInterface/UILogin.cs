@@ -1,3 +1,4 @@
+using Sfs2X.Requests;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -23,10 +24,11 @@ namespace WhackAMole
 
         private void ButtonGuestLogin_OnClicked()
         {
-            SFSController.Instance.Login(_textUsername.text, _textPassword.text, () => 
-            {
-                Debug.Log("Login Success!");
-            });
+            Debug.Log("Performing login...");
+            var client = SFSController.Instance.Client;
+            
+            client.Send(new LoginRequest(_textUsername.text));
+            PlayerPrefs.SetString(SFSController.USERNAMEKEY, _textUsername.text);
         }
     }
 }

@@ -1,5 +1,6 @@
 using Sfs2X;
 using Sfs2X.Core;
+using Sfs2X.Entities.Data;
 using Sfs2X.Logging;
 using Sfs2X.Requests;
 using Sfs2X.Util;
@@ -17,6 +18,7 @@ namespace WhackAMole
         
         private Action _onLoginSuccess;
         private SmartFox _sfs;
+        public SmartFox Client => _sfs;
 
         [Header("Config")]
         [Header("SFS2X connection settings")]
@@ -64,8 +66,10 @@ namespace WhackAMole
             _sfs.AddEventListener(SFSEvent.CONNECTION, SFS_OnConnect);
             _sfs.AddEventListener(SFSEvent.CONNECTION_LOST, SFS_OnLostConnection);
             _sfs.AddEventListener(SFSEvent.CRYPTO_INIT, SFS_OnCryptoInitialized);
-            _sfs.AddEventListener(SFSEvent.LOGIN, SFS_OnLogin);
             _sfs.AddEventListener(SFSEvent.LOGIN_ERROR, SFS_OnLoginError);
+            _sfs.AddEventListener(SFSEvent.EXTENSION_RESPONSE, SFS_OnExtensionResponse);
+            
+            _sfs.AddEventListener(SFSEvent.ROOM_JOIN_ERROR, (res) => { Debug.Log("Join Room Error!"); });
 
             _sfs.Logger.EnableConsoleTrace = true;
             _sfs.Logger.LoggingLevel = logLevel;
@@ -105,6 +109,7 @@ namespace WhackAMole
             Debug.Log("Performing login...");
             _sfs.Send(new LoginRequest(username));
             _onLoginSuccess = onLoginSuccess;
+
             PlayerPrefs.SetString(USERNAMEKEY, username);
         }
 
@@ -123,7 +128,7 @@ namespace WhackAMole
                 Debug.Log("Connection established successfully");
                 Debug.Log("SFS2X API version: " + _sfs.Version);
                 Debug.Log("Connection mode is: " + _sfs.ConnectionMode);
-                
+
                 OnConnected?.Invoke();
                 if (encrypt)
                 {
@@ -142,8 +147,8 @@ namespace WhackAMole
             _sfs.RemoveEventListener(SFSEvent.CONNECTION, SFS_OnConnect);
             _sfs.RemoveEventListener(SFSEvent.CONNECTION_LOST, SFS_OnLostConnection);
             _sfs.RemoveEventListener(SFSEvent.CRYPTO_INIT, SFS_OnCryptoInitialized);
-            _sfs.RemoveEventListener(SFSEvent.LOGIN, SFS_OnLogin);
             _sfs.RemoveEventListener(SFSEvent.LOGIN_ERROR, SFS_OnLoginError);
+            _sfs.RemoveEventListener(SFSEvent.EXTENSION_RESPONSE, SFS_OnExtensionResponse);
 
             _sfs = null;
 
@@ -184,19 +189,6 @@ namespace WhackAMole
             }
         }
 
-        private void SFS_OnLogin(BaseEvent evt)
-        {
-            Debug.Log($"[SFS] Login Success");
-            var users = _sfs.UserManager.GetUserList();
-            foreach (var item in users)
-            {
-                Debug.Log($"Name: {item.Name}, {item.PrivilegeId}");
-            }
-
-            _onLoginSuccess?.Invoke();
-            _onLoginSuccess = null;
-        }
-
         private void SFS_OnLoginError(BaseEvent evt)
         {
             Debug.Log($"[SFS] Login Error: {(string)evt.Params["errorMessage"]}");
@@ -204,6 +196,17 @@ namespace WhackAMole
             // Disconnect
             // NOTE: this causes a CONNECTION_LOST event with reason "manual", which in turn removes all SFS listeners
             _sfs.Disconnect();
+        }
+
+        private void SFS_OnExtensionResponse(BaseEvent evt)
+        {
+            //foreach (var item in evt.Params)
+            //{
+            //    Debug.Log(item.Key);
+            //}
+            //ISFSObject responseParams = (SFSObject)evt.Params["params"];
+
+            //Debug.Log("Result: " + responseParams.GetInt("resultInt"));
         }
         #endregion
     }
