@@ -474,7 +474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c3b59c0ba35b7143a511bae56c507bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  host: 127.0.0.1
+  host: 192.168.110.52
   tcpPort: 9933
   httpPort: 8080
   httpsPort: 8443
@@ -482,7 +482,7 @@ MonoBehaviour:
   encrypt: 0
   zone: SFSMole
   debug: 0
-  logLevel: 200
+  logLevel: 400
 --- !u!1 &1914693843
 GameObject:
   m_ObjectHideFlags: 0
