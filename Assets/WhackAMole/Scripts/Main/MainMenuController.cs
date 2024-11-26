@@ -101,6 +101,7 @@ namespace WhackAMole
                 
                 users[i].Id = id;
                 users[i].Username = uname;
+                i++;
             }
 
             var client = SFSController.Instance.Client;
@@ -109,7 +110,7 @@ namespace WhackAMole
             _uiLogin.Hide();
             _uiRoom.Show();
             
-            _uiRoom.SetupUsers(users);
+            _uiRoom.SetupUsers(in users);
             // SFSObject parameters = new SFSObject();
             // parameters.PutText("cmd", "GAME_START");
             // client.Send(new Sfs2X.Requests.ExtensionRequest("GameStartHandler", parameters, client.LastJoinedRoom));
