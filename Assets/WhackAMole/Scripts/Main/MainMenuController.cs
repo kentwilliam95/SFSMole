@@ -20,10 +20,13 @@ namespace WhackAMole
             client.AddEventListener(SFSEvent.EXTENSION_RESPONSE, Server_OnResponse);
             client.AddEventListener(SFSEvent.LOGIN, Client_OnLogin);
             client.AddEventListener(SFSEvent.ROOM_JOIN, Client_JoinRoomSuccess);
+            
             PanelFade.Instance.Hide();
             
             _uiLogin.Show();
             _uiRoom.Hide();
+
+            _uiRoom.OnSemiOfflineGame_Clicked = StartSemiOFflineGame;
         }
 
         private void Client_OnLogin(BaseEvent evt)
@@ -41,9 +44,7 @@ namespace WhackAMole
         {
             Debug.Log("Join Room Success!");
             var client = SFSController.Instance.Client;
-            client.Send(new ExtensionRequest("JoinedRoom", new SFSObject(), client.LastJoinedRoom));
-            
-            // Handle_UserJoinedRoom((SFSObject)evt.Params["params"]);
+            client.Send(new ExtensionRequest(Utility.CMD_JOINEDROOM, new SFSObject(), client.LastJoinedRoom));
         }
 
         private void Server_OnResponse(BaseEvent evt)
@@ -55,17 +56,9 @@ namespace WhackAMole
                 case Utility.CMD_GAMESTARTING:
                     Handle_GameStarting((SFSObject)evt.Params["params"]);
                     break;
-
                 case Utility.CMD_JOINEDROOM:
                     Handle_UserJoinedRoom((SFSObject)evt.Params["params"]);
                     break;
-
-                case Utility.CMD_HIT:
-                    break;
-
-                case Utility.CMD_GAMEEND:
-                    break;
-
                 case Utility.CMD_USERLEAVE:
                     
                     Handle_UserLeave((SFSObject)evt.Params["params"]);
@@ -76,6 +69,24 @@ namespace WhackAMole
         private void Handle_UserLeave(SFSObject obj)
         {
             Debug.Log("Handle User Leave!");
+            UIRoom.UserListData[] users;
+            
+            var arr = obj.GetSFSArray("users");
+            users = new UIRoom.UserListData[arr.Count];
+            
+            int i = 0;
+            foreach (var VARIABLE in arr)
+            {
+                var sfsObj = (SFSObject)VARIABLE;
+                int id = sfsObj.GetInt("id");
+                string uname = sfsObj.GetText("username");
+                
+                users[i].Id = id;
+                users[i].Username = uname;
+                
+                i++;
+            }
+            _uiRoom.SetupUsers(users);
         }
 
         private void Handle_GameStarting(SFSObject obj)
@@ -101,19 +112,23 @@ namespace WhackAMole
                 
                 users[i].Id = id;
                 users[i].Username = uname;
+                
                 i++;
             }
-
-            var client = SFSController.Instance.Client;
-            Debug.Log(client.LastJoinedRoom);
             
             _uiLogin.Hide();
             _uiRoom.Show();
             
             _uiRoom.SetupUsers(in users);
-            // SFSObject parameters = new SFSObject();
-            // parameters.PutText("cmd", "GAME_START");
-            // client.Send(new Sfs2X.Requests.ExtensionRequest("GameStartHandler", parameters, client.LastJoinedRoom));
+        }
+
+        public void StartSemiOFflineGame()
+        {
+            SFSObject parameters = new SFSObject();
+            var client = SFSController.Instance.Client;
+            
+            parameters.PutText("cmd", "GAME_START");
+            client.Send(new Sfs2X.Requests.ExtensionRequest(Utility.CMD_GAMESTARTING, parameters, client.LastJoinedRoom));
         }
     }
 }
