@@ -1607,6 +1607,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _textPrefab: {fileID: 1938205464001293681}
-  _rtTextContainer: {fileID: 8914956763600091549}
+  _rtTextContainer: {fileID: 8502025381683812570}
   _textRoomSize: {fileID: 544355435822243205}
   _textRoomName: {fileID: 1672897622844397387}
