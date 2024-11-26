@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace WhackAMole
 {
-    public class UILogin : MonoBehaviour
+    public class UILogin : UIBase
     {
         [SerializeField] private Button _buttonGuestLogin;
         [SerializeField] private Button _buttonLogin;

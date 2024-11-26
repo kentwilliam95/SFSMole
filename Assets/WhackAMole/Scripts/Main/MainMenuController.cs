@@ -4,17 +4,16 @@ using Sfs2X.Requests;
 using System.Collections;
 using System.Collections.Generic;
 using Codice.Client.BaseCommands.Config;
+using Sfs2X.Entities;
 using UnityEngine;
 
 namespace WhackAMole
 {
-    public enum RoomResponse
-    {
-
-    }
-
     public class MainMenuController : MonoBehaviour
     {
+        [SerializeField] private UIRoom _uiRoom;
+        [SerializeField] private UILogin _uiLogin;
+        
         private void Start()
         {
             var client = SFSController.Instance.Client;
@@ -22,6 +21,9 @@ namespace WhackAMole
             client.AddEventListener(SFSEvent.LOGIN, Client_OnLogin);
             client.AddEventListener(SFSEvent.ROOM_JOIN, Client_JoinRoomSuccess);
             PanelFade.Instance.Hide();
+            
+            _uiLogin.Show();
+            _uiRoom.Hide();
         }
 
         private void Client_OnLogin(BaseEvent evt)
@@ -86,12 +88,28 @@ namespace WhackAMole
         private void Handle_UserJoinedRoom(SFSObject obj)
         {
             Debug.Log("Joined a Room!");
+            UIRoom.UserListData[] users;
             var arr = obj.GetSFSArray("users");
+            
+            users = new UIRoom.UserListData[arr.Count];
+            int i = 0;
             foreach (var VARIABLE in arr)
             {
                 var sfsObj = (SFSObject)VARIABLE;
-                Debug.Log($"Username: {sfsObj.GetText("username")}, ID: {sfsObj.GetInt("id")}");
+                int id = sfsObj.GetInt("id");
+                string uname = sfsObj.GetText("username");
+                
+                users[i].Id = id;
+                users[i].Username = uname;
             }
+
+            var client = SFSController.Instance.Client;
+            Debug.Log(client.LastJoinedRoom);
+            
+            _uiLogin.Hide();
+            _uiRoom.Show();
+            
+            _uiRoom.SetupUsers(users);
             // SFSObject parameters = new SFSObject();
             // parameters.PutText("cmd", "GAME_START");
             // client.Send(new Sfs2X.Requests.ExtensionRequest("GameStartHandler", parameters, client.LastJoinedRoom));
