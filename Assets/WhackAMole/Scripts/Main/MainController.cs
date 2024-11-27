@@ -18,6 +18,8 @@ namespace WhackAMole
             {
                 initializes[i].Initialize();
             }
+            
+            StartCoroutine(TestDelay());
         }
 
         private void Start()
@@ -36,6 +38,13 @@ namespace WhackAMole
         private void SFS_OnDisconnectedFromServer()
         {
             IsConnectedToServer = false;
+        }
+
+        IEnumerator TestDelay()
+        {
+            Debug.Log(Time.time);
+            yield return new WaitForSeconds(2);
+            Debug.Log(Time.time);
         }
     }
 }

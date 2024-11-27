@@ -4,6 +4,7 @@ using Sfs2X.Requests;
 using System.Collections;
 using System.Collections.Generic;
 using Codice.Client.BaseCommands.Config;
+using Sfs2X;
 using Sfs2X.Entities;
 using UnityEngine;
 
@@ -13,16 +14,20 @@ namespace WhackAMole
     {
         [SerializeField] private UIRoom _uiRoom;
         [SerializeField] private UILogin _uiLogin;
-        
+
+        private SmartFox Client => SFSController.Instance.Client;
+
+        private int userCount;
+
         private void Start()
         {
             var client = SFSController.Instance.Client;
             client.AddEventListener(SFSEvent.EXTENSION_RESPONSE, Server_OnResponse);
             client.AddEventListener(SFSEvent.LOGIN, Client_OnLogin);
             client.AddEventListener(SFSEvent.ROOM_JOIN, Client_JoinRoomSuccess);
-            
+
             PanelFade.Instance.Hide();
-            
+
             _uiLogin.Show();
             _uiRoom.Hide();
 
@@ -60,7 +65,6 @@ namespace WhackAMole
                     Handle_UserJoinedRoom((SFSObject)evt.Params["params"]);
                     break;
                 case Utility.CMD_USERLEAVE:
-                    
                     Handle_UserLeave((SFSObject)evt.Params["params"]);
                     break;
             }
@@ -69,29 +73,37 @@ namespace WhackAMole
         private void Handle_UserLeave(SFSObject obj)
         {
             Debug.Log("Handle User Leave!");
-            UIRoom.UserListData[] users;
-            
+
             var arr = obj.GetSFSArray("users");
-            users = new UIRoom.UserListData[arr.Count];
-            
+            GenerateUserListFromServer(arr, out UIRoom.UserListData[] users);
+            AudioController.Instance.PlaySFX(SFXData.ID.NegativeDing);
+            _uiRoom.SetupUsers(users);
+        }
+
+        private void GenerateUserListFromServer(ISFSArray array, out UIRoom.UserListData[] users)
+        {
+            users = new UIRoom.UserListData[array.Count];
             int i = 0;
-            foreach (var VARIABLE in arr)
+            foreach (var VARIABLE in array)
             {
                 var sfsObj = (SFSObject)VARIABLE;
                 int id = sfsObj.GetInt("id");
                 string uname = sfsObj.GetText("username");
-                
+
                 users[i].Id = id;
                 users[i].Username = uname;
-                
+
                 i++;
             }
-            _uiRoom.SetupUsers(users);
         }
 
         private void Handle_GameStarting(SFSObject obj)
         {
             Debug.Log("Handle Game Starting");
+            Client.RemoveEventListener(SFSEvent.EXTENSION_RESPONSE, Server_OnResponse);
+            Client.RemoveEventListener(SFSEvent.LOGIN, Client_OnLogin);
+            Client.RemoveEventListener(SFSEvent.ROOM_JOIN, Client_JoinRoomSuccess);
+            
             //load the game scene here.
             SceneController.Instance.LoadScene(SceneController.SceneType.Game, null);
         }
@@ -99,36 +111,25 @@ namespace WhackAMole
         private void Handle_UserJoinedRoom(SFSObject obj)
         {
             Debug.Log("Joined a Room!");
-            UIRoom.UserListData[] users;
             var arr = obj.GetSFSArray("users");
-            
-            users = new UIRoom.UserListData[arr.Count];
-            int i = 0;
-            foreach (var VARIABLE in arr)
-            {
-                var sfsObj = (SFSObject)VARIABLE;
-                int id = sfsObj.GetInt("id");
-                string uname = sfsObj.GetText("username");
-                
-                users[i].Id = id;
-                users[i].Username = uname;
-                
-                i++;
-            }
-            
+            GenerateUserListFromServer(arr, out UIRoom.UserListData[] users);
+
             _uiLogin.Hide();
             _uiRoom.Show();
-            
+
             _uiRoom.SetupUsers(in users);
+
+            AudioController.Instance.PlaySFX(SFXData.ID.PositiveDing);
         }
 
         public void StartSemiOFflineGame()
         {
             SFSObject parameters = new SFSObject();
             var client = SFSController.Instance.Client;
-            
+
             parameters.PutText("cmd", "GAME_START");
-            client.Send(new Sfs2X.Requests.ExtensionRequest(Utility.CMD_GAMESTARTING, parameters, client.LastJoinedRoom));
+            client.Send(
+                new Sfs2X.Requests.ExtensionRequest(Utility.CMD_GAMESTARTING, parameters, client.LastJoinedRoom));
         }
     }
 }

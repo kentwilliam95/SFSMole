@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fcf2d056bb984dea80d77c4af02ccc2, type: 3}
+  m_Name: SFX
+  m_EditorClassIdentifier: 
+  _data:
+  - Id: 1
+    AudioClip: {fileID: 8300000, guid: 515bbb0aa1375416e8333668b852781c, type: 3}
+  - Id: 0
+    AudioClip: {fileID: 8300000, guid: 0bbe3e57b7e0a4fa79c116d9c82806dc, type: 3}
+  - Id: 2
+    AudioClip: {fileID: 8300000, guid: ff7ee3e2eb2b4446d9e89d688c30fd07, type: 3}
+  - Id: 3
+    AudioClip: {fileID: 8300000, guid: 4ffa1a623d96f4c4e9d0f92ae1e57bd9, type: 3}
+  - Id: 4
+    AudioClip: {fileID: 8300000, guid: c504862191a4e4efba33a266af1b5a19, type: 3}
+  - Id: 5
+    AudioClip: {fileID: 8300000, guid: 380022b4185ac45ab89cb6b79cbefe81, type: 3}
+  - Id: 6
+    AudioClip: {fileID: 8300000, guid: 4b49f8ad536c34fee87b081de4343285, type: 3}
+  - Id: 7
+    AudioClip: {fileID: 8300000, guid: 8121f0a28b2834296bca848096fa21a1, type: 3}
