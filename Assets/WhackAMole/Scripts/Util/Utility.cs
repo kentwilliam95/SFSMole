@@ -6,7 +6,7 @@ public class Utility
 {
     public const string CMD_JOINEDROOM = "CMD_JOINEDROOM";
     public const string CMD_HIT = "CMD_HIT";
-    public const string CMD_GAMEEND = "CMD_GAMEEND";
+    
     public const string CMD_USERJOINNED = "CMD_USERJOINNED";
     public const string CMD_USERLEAVE = "CMD_USERLEAVE";
     public const string CMD_GAMESTARTING = "CMD_GAMESTARTING";
@@ -14,6 +14,7 @@ public class Utility
     public const string CMD_GAMEREADY = "CMD_GAMEREADY";
     public const string CMD_STARTGAME = "CMD_STARTGAME";
     public const string CMD_GAMESETTINGRECEIVED = "CMD_GAMESETTINGRECEIVED";
+    public const string CMD_GAMEEND = "CMD_GAMEEND";
 
     public struct RoomSetting
     {

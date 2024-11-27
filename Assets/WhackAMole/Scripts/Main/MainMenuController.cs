@@ -28,8 +28,19 @@ namespace WhackAMole
 
             PanelFade.Instance.Hide();
 
-            _uiLogin.Show();
-            _uiRoom.Hide();
+
+            if (!client.IsConnected)
+            {
+                _uiLogin.Show();
+                _uiRoom.Hide();
+            }
+            else
+            {
+                SFSObject req = new SFSObject();
+                req.PutUtfString("room", "WhackRoom");
+
+                client.Send(new ExtensionRequest("CustomJoinRoom", req));
+            }
 
             _uiRoom.OnSemiOfflineGame_Clicked = StartSemiOFflineGame;
         }
@@ -103,7 +114,7 @@ namespace WhackAMole
             Client.RemoveEventListener(SFSEvent.EXTENSION_RESPONSE, Server_OnResponse);
             Client.RemoveEventListener(SFSEvent.LOGIN, Client_OnLogin);
             Client.RemoveEventListener(SFSEvent.ROOM_JOIN, Client_JoinRoomSuccess);
-            
+
             //load the game scene here.
             SceneController.Instance.LoadScene(SceneController.SceneType.Game, null);
         }

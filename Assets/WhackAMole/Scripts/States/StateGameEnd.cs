@@ -22,7 +22,7 @@ namespace WhackAMole.States
             
             t.Client.Send(new ExtensionRequest(Utility.CMD_GAMEEND, req, t.Client.LastJoinedRoom));
             
-            Debug.Log("Mole Hit!");
+            PanelLoading.Instance.Show("Waiting for other players or server!");
         }
 
         public void Update(GameController t)

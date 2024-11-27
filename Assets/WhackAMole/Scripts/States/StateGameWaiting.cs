@@ -13,7 +13,7 @@ namespace WhackAMole.States
 
         public void Enter(GameController t)
         {
-            PanelLoading.Instance.Show("Waiting for Server!");
+            PanelLoading.Instance.Show("Waiting for Others!");
             t.Client.Send(new ExtensionRequest(Utility.CMD_GAMEREADY, new SFSObject(), t.Client.LastJoinedRoom));
         }
 
