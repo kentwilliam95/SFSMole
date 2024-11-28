@@ -42,8 +42,7 @@ namespace WhackAMole
             GameSetting = new Utility.GameSetting();
             
             _fsmGame = new StateMachine<GameController>(this);
-            // _fsmGame.ChangeState(new StateGameWaiting());
-            Handle_StartGame(null);
+            _fsmGame.ChangeState(new StateGameWaiting());
         }
 
         private void Update()
@@ -83,8 +82,12 @@ namespace WhackAMole
         {
             mole.Hit();
             GameSetting.IncreaseHitCount();
+            
             //send hit to server
-
+            SFSObject send = new SFSObject();
+            send.PutInt("HitCount", GameSetting.HitCount);
+            Client.Send(new ExtensionRequest(Utility.CMD_HIT,send, Client.LastJoinedRoom));
+            
             var go = PoolSpawn.Instance.Spawn(_hitParticle);
             go.transform.position = mole.TopPos;
             
@@ -94,6 +97,7 @@ namespace WhackAMole
                 AudioController.Instance.PlaySFX(SFXData.ID.GameEnd);
                 // _fsmGame.ChangeState(new StateGameEnd());
                 Handle_GameEnd(null);
+                _fsmGame.ChangeState(null);
             }
         }
         
@@ -104,7 +108,7 @@ namespace WhackAMole
         
         private void Handle_GameReady(SFSObject val)
         {
-            int[] arr = val.GetIntArray("SpawnSequence");
+            int[] arr = val.GetIntArray("NumberSequence");
             for (int i = 0; i < arr.Length; i++)
             {
                 GameSetting.AddSpawnSequence(arr[i]);
@@ -115,7 +119,6 @@ namespace WhackAMole
 
         private void Handle_StartGame(SFSObject val)
         {
-            //need to handle lag here to make all client start at the same time
             _fsmGame.ChangeState(new StateGameIsStarting(3));
         }
 

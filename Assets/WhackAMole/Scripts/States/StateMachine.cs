@@ -21,9 +21,12 @@ namespace WhackAMole
             {
                 _current.Exit(_owner);
             }
-
+            
             _current = nextState;
-            _current.Enter(_owner);
+            if (nextState != null)
+            {
+                _current.Enter(_owner);   
+            }
         }
 
         public void Update()

@@ -28,19 +28,8 @@ namespace WhackAMole
 
             PanelFade.Instance.Hide();
 
-
-            if (!client.IsConnected)
-            {
-                _uiLogin.Show();
-                _uiRoom.Hide();
-            }
-            else
-            {
-                SFSObject req = new SFSObject();
-                req.PutUtfString("room", "WhackRoom");
-
-                client.Send(new ExtensionRequest("CustomJoinRoom", req));
-            }
+            _uiLogin.Show();
+            _uiRoom.Hide();
 
             _uiRoom.OnSemiOfflineGame_Clicked = StartSemiOFflineGame;
         }
