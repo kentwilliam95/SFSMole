@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Utility
 {
+    public const string CMD_LATENCY = "CMD_LATENCY";
+    public const string CMD_PING = "CMD_PING";
+    public const string CMD_PONG = "CMD_PONG";
+
     public const string CMD_JOINEDROOM = "CMD_JOINEDROOM";
     public const string CMD_HIT = "CMD_HIT";
     

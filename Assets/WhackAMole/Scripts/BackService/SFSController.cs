@@ -1,3 +1,4 @@
+using PlasticGui.WorkspaceWindow.PendingChanges;
 using Sfs2X;
 using Sfs2X.Core;
 using Sfs2X.Entities.Data;
@@ -62,12 +63,13 @@ namespace WhackAMole
 #else
             _sfs = new SmartFox(encrypt ? UseWebSocket.WSS_BIN : UseWebSocket.WS_BIN);
 #endif
-
+            _sfs.EnableLagMonitor(true);
             _sfs.AddEventListener(SFSEvent.CONNECTION, SFS_OnConnect);
             _sfs.AddEventListener(SFSEvent.CONNECTION_LOST, SFS_OnLostConnection);
             _sfs.AddEventListener(SFSEvent.CRYPTO_INIT, SFS_OnCryptoInitialized);
             _sfs.AddEventListener(SFSEvent.LOGIN_ERROR, SFS_OnLoginError);
             _sfs.AddEventListener(SFSEvent.EXTENSION_RESPONSE, SFS_OnExtensionResponse);
+         
 
             _sfs.Logger.EnableConsoleTrace = true;
             _sfs.Logger.LoggingLevel = logLevel;
@@ -198,13 +200,13 @@ namespace WhackAMole
 
         private void SFS_OnExtensionResponse(BaseEvent evt)
         {
-            //foreach (var item in evt.Params)
-            //{
-            //    Debug.Log(item.Key);
-            //}
-            //ISFSObject responseParams = (SFSObject)evt.Params["params"];
+            //var cmd = evt.Params["cmd"];
+            //Debug.Log(cmd);
 
-            //Debug.Log("Result: " + responseParams.GetInt("resultInt"));
+            //switch (cmd)
+            //{
+               
+            //}
         }
         #endregion
     }

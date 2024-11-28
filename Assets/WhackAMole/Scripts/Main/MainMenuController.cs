@@ -15,6 +15,7 @@ namespace WhackAMole
         [SerializeField] private UIRoom _uiRoom;
         [SerializeField] private UILogin _uiLogin;
 
+        private Coroutine _coroutineCheckPing;
         private SmartFox Client => SFSController.Instance.Client;
 
         private int userCount;
@@ -56,6 +57,8 @@ namespace WhackAMole
             Debug.Log("Join Room Success!");
             var client = SFSController.Instance.Client;
             client.Send(new ExtensionRequest(Utility.CMD_JOINEDROOM, new SFSObject(), client.LastJoinedRoom));
+
+            _coroutineCheckPing = StartCoroutine(CheckPing());
         }
 
         private void Server_OnResponse(BaseEvent evt)
@@ -73,7 +76,20 @@ namespace WhackAMole
                 case Utility.CMD_USERLEAVE:
                     Handle_UserLeave((SFSObject)evt.Params["params"]);
                     break;
+
+                case Utility.CMD_PING:
+                    Handle_CheckPing(evt);
+                    break;
             }
+        }
+
+        private void Handle_CheckPing(BaseEvent evt)
+        {
+            var paramSFS = (SFSObject)evt.Params["params"];
+            SFSObject pong = new SFSObject();
+            pong.PutText("cmd", Utility.CMD_PONG);
+            pong.PutLong("TimeSpan", paramSFS.GetLong("TimeSpan"));
+            Client.Send(new ExtensionRequest(Utility.CMD_LATENCY, pong, Client.LastJoinedRoom));
         }
 
         private void Handle_UserLeave(SFSObject obj)
@@ -112,6 +128,8 @@ namespace WhackAMole
 
             //load the game scene here.
             SceneController.Instance.LoadScene(SceneController.SceneType.Game, null);
+
+            StopCoroutine(_coroutineCheckPing);
         }
 
         private void Handle_UserJoinedRoom(SFSObject obj)
@@ -136,6 +154,18 @@ namespace WhackAMole
             parameters.PutText("cmd", "GAME_START");
             client.Send(
                 new Sfs2X.Requests.ExtensionRequest(Utility.CMD_GAMESTARTING, parameters, client.LastJoinedRoom));
+        }
+
+        private IEnumerator CheckPing()
+        {
+            while (true)
+            {
+                SFSObject send = new SFSObject();
+                send.PutText("cmd", Utility.CMD_PING);
+                Client.Send(new ExtensionRequest(Utility.CMD_LATENCY, send, Client.LastJoinedRoom));
+
+                yield return new WaitForSeconds(1f);
+            }
         }
     }
 }
