@@ -25,12 +25,18 @@ namespace WhackAMole
             client.AddEventListener(SFSEvent.EXTENSION_RESPONSE, Server_OnResponse);
             client.AddEventListener(SFSEvent.LOGIN, Client_OnLogin);
             client.AddEventListener(SFSEvent.ROOM_JOIN, Client_JoinRoomSuccess);
-
+                
             PanelFade.Instance.Hide();
-
-            _uiLogin.Show();
-            _uiRoom.Hide();
-
+            if (client.MySelf == null)
+            {
+                _uiLogin.Show();
+                _uiRoom.Hide();   
+            }
+            else
+            {
+                Client_OnLogin(null);
+            }
+        
             _uiRoom.OnSemiOfflineGame_Clicked = StartSemiOFflineGame;
         }
 

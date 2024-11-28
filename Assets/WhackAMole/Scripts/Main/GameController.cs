@@ -7,6 +7,7 @@ using Sfs2X.Core;
 using Sfs2X.Entities.Data;
 using Sfs2X.Requests;
 using UnityEngine;
+using UnityEngine.Serialization;
 using WhackAMole.Game;
 using WhackAMole.Interfaces;
 using WhackAMole.States;
@@ -20,7 +21,7 @@ namespace WhackAMole
         [SerializeField] private PoolSpawnID _hitParticle;
         
         [field: SerializeField] public GameAnimatedText TextUI;
-        [SerializeField] private UIEndResult _uiEndResult;
+        [FormerlySerializedAs("_uiEndResult")] [field:SerializeField] public UIEndResult UiEndResult;
         
         public Utility.GameSetting GameSetting { get; private set; }
         private float _delay;
@@ -37,8 +38,8 @@ namespace WhackAMole
             Client.AddEventListener(SFSEvent.EXTENSION_RESPONSE, Client_OnServerResponse);
             Client.Send(new ExtensionRequest(Utility.CMD_GAMEREADY, new SFSObject(), Client.LastJoinedRoom));
 
-            _uiEndResult.OnButtonClick = UIEndResult_OnButtonClick;
-            _uiEndResult.Hide();
+            UiEndResult.OnButtonClick = UIEndResult_OnButtonClick;
+            UiEndResult.Hide();
             GameSetting = new Utility.GameSetting();
             
             _fsmGame = new StateMachine<GameController>(this);
@@ -92,13 +93,13 @@ namespace WhackAMole
             go.transform.position = mole.TopPos;
             
             // change state to game end when hit count reach 10
-            if (GameSetting.HitCount >= 10)
-            {
-                AudioController.Instance.PlaySFX(SFXData.ID.GameEnd);
-                // _fsmGame.ChangeState(new StateGameEnd());
-                Handle_GameEnd(null);
-                _fsmGame.ChangeState(null);
-            }
+            // if (GameSetting.HitCount >= 10)
+            // {
+            //     AudioController.Instance.PlaySFX(SFXData.ID.GameEnd);
+            //     // _fsmGame.ChangeState(new StateGameEnd());
+            //     Handle_GameEnd(null);
+            //     _fsmGame.ChangeState(null);
+            // }
         }
         
         public void ChangeState(IState<GameController> state)
@@ -124,7 +125,8 @@ namespace WhackAMole
 
         private void Handle_GameEnd(SFSObject val)
         {
-            _uiEndResult.Show("You Win!");
+            AudioController.Instance.PlaySFX(SFXData.ID.GameEnd);
+            _fsmGame.ChangeState(new StateGameEnd(val.GetSFSArray("Result")));
         }
 
         private void UIEndResult_OnButtonClick()
@@ -132,7 +134,7 @@ namespace WhackAMole
             SceneController.Instance.LoadScene(SceneController.SceneType.MainMenu, null);
             Client.RemoveEventListener(SFSEvent.EXTENSION_RESPONSE, Client_OnServerResponse);
             
-            Client.Send(new ExtensionRequest(Utility.CMD_USERLEAVE, new SFSObject(), Client.LastJoinedRoom));
+            Client.Send(new LeaveRoomRequest(Client.LastJoinedRoom));
             Debug.Log($"Sending exit room request, Client Last Join Room: {Client.LastJoinedRoom}");
         }
     }

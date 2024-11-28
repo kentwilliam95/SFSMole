@@ -68,8 +68,6 @@ namespace WhackAMole
             _sfs.AddEventListener(SFSEvent.CRYPTO_INIT, SFS_OnCryptoInitialized);
             _sfs.AddEventListener(SFSEvent.LOGIN_ERROR, SFS_OnLoginError);
             _sfs.AddEventListener(SFSEvent.EXTENSION_RESPONSE, SFS_OnExtensionResponse);
-            
-            _sfs.AddEventListener(SFSEvent.ROOM_JOIN_ERROR, (res) => { Debug.Log("Join Room Error!"); });
 
             _sfs.Logger.EnableConsoleTrace = true;
             _sfs.Logger.LoggingLevel = logLevel;
