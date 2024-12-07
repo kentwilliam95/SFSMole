@@ -2,7 +2,8 @@
 ![Output sample](Showcase/WhackAMole.gif)
 
 ## Whack a mole with a client server
-First time experiencing client server programming with SmartFoxServer. this is a whack a mole 3D game that you generally find in arcade game combine it with Server to play Multiplayer. it only works on the same network
+First time experiencing client server programming with SmartFoxServer. this is a whack a mole 3D game that you generally find in arcade game combine it with Server to play Multiplayer. it only works on the same network <br>
+project duration: 7 days
 
 ### Tools
 Unity 2022.3.42f1
